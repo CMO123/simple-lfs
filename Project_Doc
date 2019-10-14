@@ -13,12 +13,17 @@ The code for the LFS consist of following src files
 The code implementing the log structured filesystem is present in lfs.c. Every function defined in this file starts with lfs_. We have implement open,read,write,create,unlink,getattr and readdir functionalities.
 The file also contains a struct fuse_operations  named lfs_oper, containing pointers to the functions .
 The functions that are pointed to by fields in the struct fuse data structure all have names derived from their field names by prepending the standard bb_ prefix. So, for instance, the open() function is bb_open().
+lfs.c是实现lfs的代码。每个函数以lfs_开头。已实现open,read,write,create,unlink,getattr and readdir
+文件也包括struct fuse_operations称为lfs_oper，包含指向这些函数的指针。
+struct fuse中指针指向的函数都是通过原函数添加前缀，如open()实际指向bb_open().
 
 3. inode.h, segment.h and segment.c
 These contain the declarations and definitions of structures that represent inode and segment summary along with the methods used to read and write segment to the log.
+这包含了声明和定义inode和segment summary的结构，以及read/write segment的方法。
 
 4. cleaner.c and cleaner.h
 The cleaner function is invoked to reclaim the holes created in the log by compacting the live data and freeing segments that can be resused again.
+cleaner函数回收log生成的holes
 
 The detail explanation of the functionality of the methods implemented are given below.
 
@@ -26,6 +31,7 @@ Implementation
 ----------------------------
 The log consists of continuous segments each of SEG_SIZE. A segment is a set of blocks of BLKSIZE.
 The information about the LFS, like the superblock of a file system is maintained as a global information. 
+
 
 Global info : 
 - A hash table mapping filename to its corresponding inode and file size.
@@ -35,6 +41,15 @@ Global info :
 - The log_head that specifies the segment number in the log to be written next
 - The inode map entries. Each entry specifies the segment number and the block number of the inode (index of ino_map)
 - An bitmap to indicate which segments in the log are free
+
+superblock的全局信息：
+- 一个哈希表，将文件名映射为其对应的inode和文件大小
+- 一个大小为SEG_SIZE的buffer，用于收集segment size的数据并写入log
+- buffer中当前将被写入的block
+- LFS中已有的inode数目
+- log_head表示下一个在log中将被写入的segment号
+- inode map项。每个项指定segment号和inode的块号
+- 一个bitmap，指明log中哪个segment是free的
 
 Inode consists of inode number, size of the file, and information of its direct blocks (segment and block numbers)
 
